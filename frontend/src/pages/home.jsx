@@ -8,12 +8,10 @@ import { AuthContext } from '../contexts/AuthContext';
 
 function HomeComponent() {
 
-
     let navigate = useNavigate();
     const [meetingCode, setMeetingCode] = useState("");
+    const { addToUserHistory } = useContext(AuthContext);
 
-
-    const {addToUserHistory} = useContext(AuthContext);
     let handleJoinVideoCall = async () => {
         await addToUserHistory(meetingCode)
         navigate(`/${meetingCode}`)
@@ -21,56 +19,54 @@ function HomeComponent() {
 
     return (
         <>
-
-            <div className="navBar">
-
-                <div style={{ display: "flex", alignItems: "center" }}>
-
-                    <h2>Apna Video Call</h2>
+            <div className="navBar homeNav">
+                <div className="navLeft">
+                    <h2 className="brandTitle">श्री Connect</h2>
                 </div>
 
-                <div style={{ display: "flex", alignItems: "center" }}>
-                    <IconButton onClick={
-                        () => {
-                            navigate("/history")
-                        }
-                    }>
+                <div className="navRight">
+                    <IconButton onClick={() => navigate("/history")}>
                         <RestoreIcon />
                     </IconButton>
-                    <p>History</p>
-
-                    <Button onClick={() => {
-                        localStorage.removeItem("token")
-                        navigate("/auth")
-                    }}>
+                    <p className='historyLabel'>History</p>
+                    <Button
+                        variant="contained"
+                        color="error"
+                        onClick={() => {
+                            localStorage.removeItem("token")
+                            navigate("/auth")
+                        }}
+                    >
                         Logout
                     </Button>
                 </div>
-
-
             </div>
 
+            <div className="homeContainer">
+                <div className="homeLeft">
+                    <h2 className="homeHeading">
+                        Providing Quality Video Calls Just Like Quality Education
+                    </h2>
 
-            <div className="meetContainer">
-                <div className="leftPanel">
-                    <div>
-                        <h2>Providing Quality Video Call Just Like Quality Education</h2>
-
-                        <div style={{ display: 'flex', gap: "10px" }}>
-
-                            <TextField onChange={e => setMeetingCode(e.target.value)} id="outlined-basic" label="Meeting Code" variant="outlined" />
-                            <Button onClick={handleJoinVideoCall} variant='contained'>Join</Button>
-
-                        </div>
+                    <div className="joinBox">
+                        <TextField
+                            label="Enter Meeting Code"
+                            variant="outlined"
+                            onChange={(e) => setMeetingCode(e.target.value)}
+                            sx={{ borderRadius: 2 }}
+                        />
+                        <Button variant='contained' onClick={handleJoinVideoCall}>
+                            Join
+                        </Button>
                     </div>
                 </div>
-                <div className='rightPanel'>
-                    <img srcSet='/logo3.png' alt="" />
+
+                <div className='homeRight'>
+                    <img src='/logo3.png' alt="hero" className='homeImg' />
                 </div>
             </div>
         </>
     )
 }
-
 
 export default withAuth(HomeComponent)
