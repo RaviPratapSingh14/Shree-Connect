@@ -56,6 +56,11 @@ const start = async () => {
 
         console.log(`MONGO Connected DB Host: ${connectionDb.connection.host}`);
 
+        server.on("error", (error) => {
+            console.error("Server failed to start:", error);
+            process.exit(1);
+        });
+
         server.listen(app.get("port"), () => {
             console.log(`Server running on port ${app.get("port")}`);
         });
