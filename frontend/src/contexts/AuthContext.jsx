@@ -51,8 +51,22 @@ export const AuthProvider = ({ children }) => {
 
             if (request.status === httpStatus.OK) {
                 localStorage.setItem("token", request.data.token);
+                localStorage.setItem("username", username);
                 router("/home")
             }
+        } catch (err) {
+            throw err;
+        }
+    }
+
+    const getProfileOfUser = async () => {
+        try {
+            let request = await client.get("/me", {
+                params: {
+                    token: localStorage.getItem("token")
+                }
+            });
+            return request.data
         } catch (err) {
             throw err;
         }
@@ -86,7 +100,7 @@ export const AuthProvider = ({ children }) => {
 
 
     const data = {
-        userData, setUserData, addToUserHistory, getHistoryOfUser, handleRegister, handleLogin
+        userData, setUserData, addToUserHistory, getHistoryOfUser, getProfileOfUser, handleRegister, handleLogin
     }
 
     return (

@@ -11,8 +11,22 @@ import Typography from '@mui/material/Typography';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import { AuthContext } from '../contexts/AuthContext';
 import { Snackbar } from '@mui/material';
+import SupportFooter from '../components/SupportFooter';
+import AppNavbar from '../components/AppNavbar';
 
-const defaultTheme = createTheme();
+const defaultTheme = createTheme({
+    palette: {
+        primary: {
+            main: "#2563eb",
+        },
+        secondary: {
+            main: "#f97316",
+        },
+    },
+    typography: {
+        fontFamily: "'Inter', 'Segoe UI', sans-serif",
+    },
+});
 
 export default function Authentication() {
 
@@ -48,25 +62,27 @@ export default function Authentication() {
 
     return (
         <ThemeProvider theme={defaultTheme}>
-            <Grid container component="main" sx={{ height: '100vh' }}>
+            <AppNavbar />
+            <Grid container component="main" className="authPage" sx={{ minHeight: '100vh' }}>
                 <CssBaseline />
 
-                {/* LEFT SIDE IMAGE */}
                 <Grid
                     item
                     xs={false}
                     sm={5}
                     md={7}
+                    className="authVisual"
                     sx={{
                         backgroundImage: `url(${process.env.PUBLIC_URL}/background.png)`,
-                        backgroundSize: 'cover',
-                        backgroundPosition: 'center',
-                        backgroundRepeat: 'no-repeat',
-                        filter: 'brightness(.9)'
                     }}
-                />
+                >
+                    <div>
+                        <p className="eyebrow">श्री Connect</p>
+                        <h1>Bring every conversation closer.</h1>
+                        <p>Secure sign-in, fast meeting links, and a calmer space for video calls.</p>
+                    </div>
+                </Grid>
 
-                {/* RIGHT SIDE FORM CARD */}
                 <Grid
                     item
                     xs={12}
@@ -78,12 +94,11 @@ export default function Authentication() {
                 >
                     <Box
                         sx={{
-                            my: 8,
-                            mx: 6,
+                            my: { xs: 4, md: 8 },
+                            mx: { xs: 3, md: 6 },
                             display: 'flex',
                             flexDirection: 'column',
                             alignItems: 'center',
-                            width: '100%',
                         }}
                     >
 
@@ -95,25 +110,23 @@ export default function Authentication() {
                             {formState === 0 ? "Welcome Back" : "Create Account"}
                         </Typography>
 
-                        {/* TOGGLE BUTTONS */}
-                        <Box sx={{ display: "flex", gap: 2, mb: 3 }}>
+                        <Box sx={{ display: "flex", gap: 1, mb: 3, p: .5, bgcolor: "#f1f5f9", borderRadius: 2 }}>
                             <Button
                                 variant={formState === 0 ? "contained" : "outlined"}
                                 onClick={() => setFormState(0)}
-                                sx={{ textTransform: "none", px: 3, borderRadius: 2 }}
+                                sx={{ textTransform: "none", px: 3, borderRadius: 1.5, boxShadow: "none" }}
                             >
                                 Sign In
                             </Button>
                             <Button
                                 variant={formState === 1 ? "contained" : "outlined"}
                                 onClick={() => setFormState(1)}
-                                sx={{ textTransform: "none", px: 3, borderRadius: 2 }}
+                                sx={{ textTransform: "none", px: 3, borderRadius: 1.5, boxShadow: "none" }}
                             >
                                 Sign Up
                             </Button>
                         </Box>
 
-                        {/* FORM */}
                         <Box component="form" noValidate sx={{ width: "100%", maxWidth: 420 }}>
                             
                             {formState === 1 && (
@@ -157,6 +170,7 @@ export default function Authentication() {
                                 variant="contained"
                                 sx={{ mt: 3, mb: 2, py: 1.2, borderRadius: 2, textTransform: "none", fontWeight: 600 }}
                                 onClick={handleAuth}
+                                disabled={!username.trim() || !password.trim() || (formState === 1 && !name.trim())}
                             >
                                 {formState === 0 ? "Login" : "Register"}
                             </Button>
@@ -171,6 +185,7 @@ export default function Authentication() {
                 message={message}
                 anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
             />
+            <SupportFooter />
         </ThemeProvider>
     );
 }

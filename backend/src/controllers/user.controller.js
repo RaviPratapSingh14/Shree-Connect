@@ -78,6 +78,32 @@ const getUserHistory = async (req, res) => {
     }
 }
 
+const getUserProfile = async (req, res) => {
+    const { token } = req.query;
+
+    if (!token) {
+        return res.status(httpStatus.BAD_REQUEST).json({ message: "Token is required" });
+    }
+
+    try {
+        const user = await User.findOne({ token: token }).select("name username");
+
+        if (!user) {
+            return res.status(httpStatus.NOT_FOUND).json({ message: "User Not Found" });
+        }
+
+        const meetingCount = await Meeting.countDocuments({ user_id: user.username });
+
+        return res.status(httpStatus.OK).json({
+            name: user.name,
+            username: user.username,
+            meetingCount
+        });
+    } catch (e) {
+        return res.status(500).json({ message: `Something went wrong ${e}` });
+    }
+}
+
 const addToHistory = async (req, res) => {
     const { token, meeting_code } = req.body;
 
@@ -98,4 +124,4 @@ const addToHistory = async (req, res) => {
 }
 
 
-export { login, register, getUserHistory, addToHistory }
+export { login, register, getUserHistory, addToHistory, getUserProfile }
