@@ -342,6 +342,7 @@ export default function VideoMeetComponent() {
 
             socketRef.current.on('user-joined', (id, clients) => {
                 clients.forEach((socketListId) => {
+                    if (socketListId === socketIdRef.current) return;
 
                     connections[socketListId] = new RTCPeerConnection(peerConfigConnections)
                     // Wait for their ice candidate       
@@ -556,11 +557,17 @@ export default function VideoMeetComponent() {
                     </div>
 
 
-                    <video className={styles.meetUserVideo} ref={localVideoref} autoPlay muted></video>
+                    {videos.length > 0 ? (
+                        <video className={styles.meetUserVideo} ref={localVideoref} autoPlay muted playsInline></video>
+                    ) : <></>}
 
                     <div className={styles.conferenceView}>
-                        {videos.map((video) => (
-                            <div key={video.socketId}>
+                        {videos.length === 0 ? (
+                            <div className={styles.videoTile}>
+                                <video ref={localVideoref} autoPlay muted playsInline></video>
+                            </div>
+                        ) : videos.map((video) => (
+                            <div className={styles.videoTile} key={video.socketId}>
                                 <video
 
                                     data-socket={video.socketId}
@@ -570,6 +577,7 @@ export default function VideoMeetComponent() {
                                         }
                                     }}
                                     autoPlay
+                                    playsInline
                                 >
                                 </video>
                             </div>
