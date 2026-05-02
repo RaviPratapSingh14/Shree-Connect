@@ -5,37 +5,8 @@ import mongoose from "mongoose";
 import { connectToSocket } from "./controllers/socketManager.js";
 import cors from "cors";
 import userRoutes from "./routes/users.routes.js";
-import { existsSync, readFileSync } from "node:fs";
-import { dirname, resolve } from "node:path";
-import { fileURLToPath } from "node:url";
 import { User } from "./models/user.model.js";
 import { Meeting } from "./models/meeting.model.js";
-
-const __dirname = dirname(fileURLToPath(import.meta.url));
-
-const loadEnvFile = () => {
-    const envPath = resolve(__dirname, "../.env");
-
-    if (!existsSync(envPath)) return;
-
-    const envFile = readFileSync(envPath, "utf-8");
-    envFile.split("\n").forEach((line) => {
-        const trimmedLine = line.trim();
-        if (!trimmedLine || trimmedLine.startsWith("#")) return;
-
-        const separatorIndex = trimmedLine.indexOf("=");
-        if (separatorIndex === -1) return;
-
-        const key = trimmedLine.slice(0, separatorIndex).trim();
-        const value = trimmedLine.slice(separatorIndex + 1).trim().replace(/^["']|["']$/g, "");
-
-        if (key && process.env[key] === undefined) {
-            process.env[key] = value;
-        }
-    });
-};
-
-loadEnvFile();
 
 const app = express();
 const server = createServer(app);
@@ -79,13 +50,9 @@ app.get("/api/health", async (req, res) => {
 // Start server
 const start = async () => {
     try {
-        const mongoUri = process.env.MONGO_URI;
-
-        if (!mongoUri) {
-            throw new Error("MONGO_URI is required. Add it to backend/.env or your hosting environment variables.");
-        }
-
-        const connectionDb = await mongoose.connect(mongoUri);
+        const connectionDb = await mongoose.connect(
+            "mongodb+srv://ravi:Ravi%401234@cluster0.smpdzcg.mongodb.net/shreeconnect?retryWrites=true&w=majority"
+        );
 
         console.log(`MONGO Connected DB Host: ${connectionDb.connection.host}`);
 
