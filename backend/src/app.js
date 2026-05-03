@@ -8,6 +8,8 @@ import userRoutes from "./routes/users.routes.js";
 import { User } from "./models/user.model.js";
 import { Meeting } from "./models/meeting.model.js";
 
+mongoose.set("bufferCommands", false);
+
 process.on("uncaughtException", (error) => {
     console.error("Uncaught exception:", error);
     process.exit(1);
@@ -21,6 +23,7 @@ process.on("unhandledRejection", (error) => {
 const app = express();
 const server = createServer(app);
 const io = connectToSocket(server);
+const mongoUri = "mongodb+srv://ravi:Ravi%401234@cluster0.smpdzcg.mongodb.net/shreeconnect?retryWrites=true&w=majority";
 
 // Middleware
 app.set("port", process.env.PORT || 8000);
@@ -33,15 +36,19 @@ app.use(express.urlencoded({ limit: "40kb", extended: true }));
 app.use("/api/v1/users", userRoutes);
 app.get("/api/health", async (req, res) => {
     try {
-        const [userCount, meetingCount] = await Promise.all([
-            User.countDocuments(),
-            Meeting.countDocuments()
-        ]);
+        const isConnected = mongoose.connection.readyState === 1;
+        const [userCount, meetingCount] = isConnected
+            ? await Promise.all([
+                User.countDocuments(),
+                Meeting.countDocuments()
+            ])
+            : [0, 0];
 
         res.json({
-            status: "ok",
+            status: isConnected ? "ok" : "starting",
             mongo: {
-                connected: mongoose.connection.readyState === 1,
+                connected: isConnected,
+                readyState: mongoose.connection.readyState,
                 host: mongoose.connection.host,
                 database: mongoose.connection.name,
                 collections: {
@@ -58,23 +65,27 @@ app.get("/api/health", async (req, res) => {
     }
 });
 
+const connectMongo = async () => {
+    try {
+        console.log("Connecting to MongoDB Atlas...");
+        const connectionDb = await mongoose.connect(mongoUri, {
+            serverSelectionTimeoutMS: 10000
+        });
+
+        console.log(`MONGO Connected DB Host: ${connectionDb.connection.host}`);
+        console.log(`MONGO Connected DB Name: ${connectionDb.connection.name}`);
+    } catch (error) {
+        console.error("MongoDB connection failed. Retrying in 15 seconds:", error.message);
+        setTimeout(connectMongo, 15000);
+    }
+};
+
 // Start server
 const start = async () => {
     try {
         console.log("Starting Shree Connect backend...");
         console.log(`Node version: ${process.version}`);
         console.log(`PORT: ${app.get("port")}`);
-        console.log("Connecting to MongoDB Atlas...");
-
-        const connectionDb = await mongoose.connect(
-            "mongodb+srv://ravi:Ravi%401234@cluster0.smpdzcg.mongodb.net/shreeconnect?retryWrites=true&w=majority",
-            {
-                serverSelectionTimeoutMS: 10000
-            }
-        );
-
-        console.log(`MONGO Connected DB Host: ${connectionDb.connection.host}`);
-        console.log(`MONGO Connected DB Name: ${connectionDb.connection.name}`);
 
         server.on("error", (error) => {
             console.error("Server failed to start:", error);
@@ -83,6 +94,7 @@ const start = async () => {
 
         server.listen(app.get("port"), app.get("host"), () => {
             console.log(`Server running on ${app.get("host")}:${app.get("port")}`);
+            connectMongo();
         });
 
     } catch (error) {
